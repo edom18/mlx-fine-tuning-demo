@@ -1,0 +1,15 @@
+[project]
+name = "mlx-fine-tuning-demo"
+version = "0.1.0"
+description = "Gemma 3n E2B を MLX で LoRA ファインチューニングし、ローカル運用するまでのデモ"
+requires-python = ">=3.11"
+dependencies = [
+    "mlx-lm>=0.31", # Apple Silicon 向け学習・推論
+    "numpy", # 次トークン確率の可視化など
+    "anthropic", # 合成データ生成/judge の teacher（任意。ローカルバックエンドなら不要）
+    "python-dotenv", # .env から ANTHROPIC_API_KEY 等を読み込む
+    "gguf>=0.19.0",
+]
+
+[tool.uv]
+package = false

@@ -1,0 +1,18 @@
+# Chapter 11: Ollama 登録用 Modelfile
+# 使い方:
+#   1) scripts/09_to_ollama.sh で fused_model/*.gguf を作る
+#   2) 下の FROM を実際に出来た .gguf のパスへ合わせる
+#   3) ollama create support-classifier -f Modelfile
+#   4) ollama run support-classifier "領収書を再発行したいです"
+
+FROM ./fused_model/ggml-model-f16.gguf
+
+# 分類器なので決定的に・短く出させる
+PARAMETER temperature 0
+PARAMETER num_predict 16
+PARAMETER stop "<end_of_turn>"
+
+SYSTEM """あなたは社内SaaSのカスタマーサポート問い合わせ分類器です。
+ユーザーの問い合わせ文を読み、次のラベルのうち最も適切なものを1つだけ、ラベル名のみで出力してください。説明・前置き・記号・引用符は一切付けないこと。
+
+出力できるのは次のいずれか1つだけです: 請求・支払い / 技術サポート / アカウント・認証 / 解約・プラン変更 / 使い方・操作質問 / その他"""

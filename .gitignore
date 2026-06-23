@@ -1,0 +1,57 @@
+# ───────────────────────────────────────────────
+#  mlx-fine-tuning-demo — .gitignore
+# ───────────────────────────────────────────────
+
+# --- 秘密情報（最重要：APIキーを絶対にコミットしない）---
+.env
+.env.*
+!.env.example
+
+# --- Python ---
+__pycache__/
+*.py[cod]
+*$py.class
+.Python
+*.egg-info/
+.pytest_cache/
+.ipynb_checkpoints/
+
+# --- uv / 仮想環境 ---
+.venv/
+venv/
+env/
+# uv.lock は再現性のためコミットする（無視しない）
+
+# --- 学習・推論の生成物（重い・再生成可能）---
+adapters/
+fused_model/
+*.gguf
+*.safetensors
+*.npz
+wandb/
+runs/
+checkpoints/
+
+# --- 合成・分割で生成されるデータ（手書きの種は残す）---
+data/raw_synth.jsonl
+data/kept.jsonl
+data/rejected.jsonl
+data/train.jsonl
+data/valid.jsonl
+data/test.jsonl
+# 上記以外の *.jsonl も生成物なら無視しつつ、手書きの seed は残す
+data/*.jsonl
+!data/seed.jsonl
+
+# --- Hugging Face / モデルキャッシュ（万一リポジトリ内に作られた場合）---
+.cache/
+hf_cache/
+models/
+
+# --- OS / エディタ ---
+.DS_Store
+.AppleDouble
+Thumbs.db
+.idea/
+.vscode/
+*.swp

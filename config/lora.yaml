@@ -1,0 +1,42 @@
+# Chapter 9: LoRA 学習設定
+# 実行:  uv run mlx_lm.lora -c config/lora.yaml
+# 生成物: adapters/  (LoRAアダプタ。本体モデルは書き換えない)
+#
+# キーは mlx_lm 0.31 系で検証済み。値はこの講義タスク向けに調整。
+
+model: mlx-community/gemma-3n-E2B-it-lm-4bit   # 4bit版にLoRA = QLoRA。テキスト専用LM(-lm-)。省メモリで初回向き
+train: true
+fine_tune_type: lora                       # lora / dora / full
+data: data                                 # data/train.jsonl, valid.jsonl, test.jsonl を読む
+seed: 0
+
+# ── 学習パラメータ ───────────────────────────────
+batch_size: 4
+iters: 300                # データ件数に応じて調整(目安: 数エポック分)
+max_seq_length: 1024      # 問い合わせ文は短いので十分。大きいほどメモリを食う
+learning_rate: 1.0e-4     # LoRAは本体FTより高め(1e-4〜2e-4)が定番
+num_layers: 16            # 上位16層にLoRAを差し込む(モデル層数以下にする)
+grad_checkpoint: true     # メモリ節約(少し遅くなる)
+
+# 完了部(assistant=正解ラベル)だけを損失対象にする。生成LLM方式SFTの肝。
+mask_prompt: true
+
+# ── LoRA本体のハイパラ ──────────────────────────
+lora_parameters:
+  # 差し込む層を明示。省くと層内の全Linearを包み、gemma3nのAltUp(prediction_coefs等＝
+  # forwardで .weight を直接書き換える層)まで包んで "no attribute 'weight'" で落ちる。
+  # 注意機構の投影だけに限定すれば安全（古典的なLoRAターゲット）。
+  keys: ["self_attn.q_proj", "self_attn.k_proj", "self_attn.v_proj", "self_attn.o_proj"]
+  rank: 8                 # 差分行列のランク。大きいほど表現力↑/過学習リスク↑
+  dropout: 0.05
+  scale: 20.0
+
+# ── 最適化 ──────────────────────────────────────
+optimizer: adam
+
+# ── 検証・チェックポイント ──────────────────────
+val_batches: 5
+steps_per_report: 10
+steps_per_eval: 50
+adapter_path: adapters
+save_every: 100
